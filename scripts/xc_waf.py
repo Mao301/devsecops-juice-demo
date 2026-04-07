@@ -31,12 +31,17 @@ policy_url = f"{BASE_URL}/api/config/namespaces/{NAMESPACE}/app_firewalls"
 
 resp = requests.post(policy_url, headers=HEADERS, json=waf_policy)
 
-if resp.status_code not in [200, 201]:
+# Si ya existe, ignoramos error 409
+if resp.status_code not in [200, 201, 409]:
     print("❌ Error creating WAF policy")
-    print(resp.text)
+    print(resp.status_code, resp.text)
     sys.exit(1)
 
-print("✅ WAF policy created/updated")
+if resp.status_code == 409:
+    print("ℹ️ WAF policy already exists, continuing...")
+
+else:
+    print("✅ WAF policy created/updated")
 
 # 3. Obtener Load Balancer
 lb_url = f"{BASE_URL}/api/config/namespaces/{NAMESPACE}/http_loadbalancers/{LB_NAME}"
@@ -45,17 +50,22 @@ lb_resp = requests.get(lb_url, headers=HEADERS)
 
 if lb_resp.status_code != 200:
     print("❌ Error getting Load Balancer")
-    print(lb_resp.text)
+    print(lb_resp.status_code, lb_resp.text)
     sys.exit(1)
 
 lb_data = lb_resp.json()
 
-# 4. Asegurar estructura
+# 4. Validar estructura
 if "spec" not in lb_data:
     print("❌ LB spec not found")
     sys.exit(1)
 
-# 5. Configurar WAF
+# 🔥 5. FIX CRÍTICO: eliminar disable_waf si existe
+if "disable_waf" in lb_data["spec"]:
+    print("🧹 Removing disable_waf to avoid conflict...")
+    del lb_data["spec"]["disable_waf"]
+
+# 6. Configurar WAF
 lb_data["spec"]["app_firewall"] = {
     "name": policy_name,
     "namespace": NAMESPACE
@@ -65,12 +75,12 @@ lb_data["spec"]["enable_app_firewall"] = True
 
 print("🔐 Attaching WAF to Load Balancer...")
 
-# 6. Actualizar LB
+# 7. Actualizar LB
 update_resp = requests.put(lb_url, headers=HEADERS, json=lb_data)
 
 if update_resp.status_code != 200:
     print("❌ Error updating Load Balancer")
-    print(update_resp.text)
+    print(update_resp.status_code, update_resp.text)
     sys.exit(1)
 
 print("🚀 WAF successfully enabled on Load Balancer!")
