@@ -4,8 +4,8 @@
     "namespace": "m-ocampo"
   },
   "spec": {
-    "blocking": true,
-    "default_anonymization": true,
-    "allow_all_response_codes": false
+    "blocking": {},
+    "default_detection_settings": {},
+    "default_bot_setting": {}
   }
 }
