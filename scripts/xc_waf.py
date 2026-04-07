@@ -14,7 +14,7 @@ NAMESPACE = "m-ocampo"
 LB_NAME = "demo-multicloud-mao"
 
 HEADERS = {
-    "Authorization": f"Bearer {XC_API_TOKEN}",
+    "Authorization": f"APIToken {XC_API_TOKEN}",
     "Content-Type": "application/json"
 }
 
