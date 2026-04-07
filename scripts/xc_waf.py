@@ -27,7 +27,7 @@ policy_name = waf_policy["metadata"]["name"]
 print(f"📄 Applying WAF policy: {policy_name}")
 
 # 2. Crear/actualizar policy
-policy_url = f"{BASE_URL}/api/config/namespaces/{NAMESPACE}/app_firewall"
+policy_url = f"{BASE_URL}/api/config/namespaces/{NAMESPACE}/app_firewall_policies"
 
 resp = requests.post(policy_url, headers=HEADERS, json=waf_policy)
 
