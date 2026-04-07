@@ -1,0 +1,25 @@
+name: DevSecOps Pipeline
+
+on:
+  pull_request:
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Run Heyhack scan
+        env:
+          HEYHACK_API_KEY: ${{ secrets.HEYHACK_API_KEY }}
+          TARGET_URL: http://localhost:3000
+        run: python scripts/heyhack_scan.py
