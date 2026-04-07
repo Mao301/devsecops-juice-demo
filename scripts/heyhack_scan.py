@@ -13,8 +13,8 @@ def main():
         sys.exit(1)
 
     heyhack_url = "https://app.heyhack.com/api/scanjobs"
-    profile_id = "3b2f8285-6cb8-40d4-a286-b4d07870f36e"
-    application_id = "9c098294-da9f-4529-b424-9a8a88efc7b5"
+    profile_id = "9066c97f-d8e6-4c08-b48a-5bb96814f70a"
+    application_id = "ff836b6a-5628-467d-8b2e-925c149fa4d6"
 
     params = {
         "profile_id": profile_id,
