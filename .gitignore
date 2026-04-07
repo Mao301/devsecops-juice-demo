@@ -1,0 +1,49 @@
+# =========================
+# 🔐 Secrets / Env files
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# 🐍 Python
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# Virtual environments
+venv/
+.env/
+
+# =========================
+# 🟢 Node (Juice Shop)
+# =========================
+app/juice-shop/node_modules/
+app/juice-shop/npm-debug.log
+
+# =========================
+# 🐳 Docker
+# =========================
+*.pid
+*.seed
+
+# =========================
+# 💻 OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# 🧠 IDEs
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# 🧪 Testing / Reports
+# =========================
+reports/
+*.html
