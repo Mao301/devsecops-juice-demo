@@ -12,8 +12,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout app repo
         uses: actions/checkout@v4
+
+      - name: Checkout security repo
+        uses: actions/checkout@v4
+        with:
+          repository: Mao301/security-policies
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: security
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -23,21 +30,29 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Attach WAF policy (XC)
+      - name: Apply WAF policy from security repo
         env:
           XC_API_TOKEN: ${{ secrets.XC_API_TOKEN }}
-        run: python scripts/xc_waf.py
+        run: python security/scripts/xc_waf.py
+
 
   # =========================
-  # 2. RUN SCAN + MONITOR
+  # 2. SECURITY SCAN + MONITOR
   # =========================
   security-scan:
     needs: attach-waf
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout app repo
         uses: actions/checkout@v4
+
+      - name: Checkout security repo
+        uses: actions/checkout@v4
+        with:
+          repository: Mao301/security-policies
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: security
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -47,22 +62,22 @@ jobs:
       - name: Install dependencies
         run: pip install requests python-dotenv
 
-      # 🔥 Lanzar scan en background
+      # 🚀 Start scan (background)
       - name: Start Heyhack scan
         env:
           HEYHACK_API_KEY: ${{ secrets.HEYHACK_API_KEY }}
           APPLICATION_ID: ${{ secrets.APPLICATION_ID }}
         run: |
           echo "🚀 Starting Heyhack scan..."
-          python scripts/heyhack_scan.py &
+          python security/scripts/heyhack_scan.py &
 
-      # 🔥 Monitor en foreground (fail fast)
+      # 🔍 Monitor (foreground - fail fast)
       - name: Monitor findings (fail fast)
         env:
           HEYHACK_API_KEY: ${{ secrets.HEYHACK_API_KEY }}
           APPLICATION_ID: ${{ secrets.APPLICATION_ID }}
-          CVSS_THRESHOLD: 11
+          CVSS_THRESHOLD: 11   # puedes bajar a 8 cuando quieras
           CHECK_INTERVAL: 30
         run: |
           echo "🔍 Monitoring findings..."
-          python -u scripts/heyhack_monitor.py
+          python -u security/scripts/heyhack_monitor.py
