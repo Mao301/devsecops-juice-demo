@@ -9,7 +9,7 @@ import sys
 API_KEY = os.getenv("HEYHACK_API_KEY")
 APPLICATION_ID = os.getenv("APPLICATION_ID")
 
-THRESHOLD = float(os.getenv("CVSS_THRESHOLD", 8))
+THRESHOLD = float(os.getenv("CVSS_THRESHOLD", 11))
 INTERVAL = int(os.getenv("CHECK_INTERVAL", 30))
 
 BASE_URL = "https://app.heyhack.com/api/findings"
