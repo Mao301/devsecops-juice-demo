@@ -65,4 +65,4 @@ jobs:
           CHECK_INTERVAL: 30
         run: |
           echo "🔍 Monitoring findings..."
-          python scripts/heyhack_monitor.py
+          python -u scripts/heyhack_monitor.py
