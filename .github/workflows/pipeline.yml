@@ -4,7 +4,28 @@ on:
   pull_request:
 
 jobs:
+
+  attach-waf:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: pip install requests
+
+      - name: Attach WAF policy to XC
+        env:
+          XC_API_TOKEN: ${{ secrets.XC_API_TOKEN }}
+        run: python scripts/xc_waf.py
+
   security-scan:
+    needs: attach-waf
     runs-on: ubuntu-latest
 
     steps:
@@ -23,23 +44,3 @@ jobs:
           HEYHACK_API_KEY: ${{ secrets.HEYHACK_API_KEY }}
           TARGET_URL: http://54.183.218.234:3000
         run: python scripts/heyhack_scan.py
-
-  deploy-waf:
-    needs: security-scan
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install deps
-        run: pip install requests
-
-      - name: Apply WAF policy to XC
-        env:
-          XC_API_TOKEN: ${{ secrets.XC_API_TOKEN }}
-        run: python scripts/xc_waf.py
