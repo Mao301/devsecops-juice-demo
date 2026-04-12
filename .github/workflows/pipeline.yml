@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Mao301/security-policies
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
           path: security
 
       - name: Setup Python
@@ -51,7 +51,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Mao301/security-policies
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
           path: security
 
       - name: Setup Python
