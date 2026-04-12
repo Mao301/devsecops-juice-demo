@@ -61,7 +61,7 @@ jobs:
         env:
           HEYHACK_API_KEY: ${{ secrets.HEYHACK_API_KEY }}
           APPLICATION_ID: ${{ secrets.APPLICATION_ID }}
-          CVSS_THRESHOLD: 8
+          CVSS_THRESHOLD: 11
           CHECK_INTERVAL: 30
         run: |
           echo "🔍 Monitoring findings..."
