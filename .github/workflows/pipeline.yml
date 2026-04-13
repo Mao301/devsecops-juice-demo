@@ -84,6 +84,6 @@ jobs:
         env:
           HEYHACK_API_KEY: ${{ secrets.HEYHACK_API_KEY }}
           APPLICATION_ID: ${{ secrets.APPLICATION_ID }}
-          CVSS_THRESHOLD: 11
+          CVSS_THRESHOLD: 8
           CHECK_INTERVAL: 30
         run: python -u security/scripts/heyhack_monitor.py
