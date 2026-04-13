@@ -4,22 +4,86 @@ on:
   pull_request:
 
 jobs:
-  security-scan:
+
+  # =========================
+  # SECURITY CONTROLS
+  # =========================
+  security-controls:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout app repo
+        uses: actions/checkout@v4
+
+      - name: Checkout security repo
+        uses: actions/checkout@v4
+        with:
+          repository: Mao301/security-policies
+          token: ${{ secrets.GH_PAT }}
+          path: security
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install deps
-        run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: pip install requests
 
+      # 🔐 WAF
+      - name: Apply WAF policy
+        env:
+          XC_API_TOKEN: ${{ secrets.XC_API_TOKEN }}
+        run: python security/scripts/xc_waf.py
+
+      # 🌍 OFAC
+      - name: Apply OFAC policy
+        env:
+          XC_API_TOKEN: ${{ secrets.XC_API_TOKEN }}
+          XC_TENANT: ${{ secrets.XC_TENANT }}
+          XC_NAMESPACE: m-ocampo
+          XC_LB_NAME: demo-multicloud-mao
+        run: python security/scripts/xc_ofac.py
+
+
+  # =========================
+  # SCAN + MONITOR
+  # =========================
+  security-scan:
+    needs: security-controls
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout app repo
+        uses: actions/checkout@v4
+
+      - name: Checkout security repo
+        uses: actions/checkout@v4
+        with:
+          repository: Mao301/security-policies
+          token: ${{ secrets.GH_PAT }}
+          path: security
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests python-dotenv
+
+      # 🚀 SCAN
       - name: Run Heyhack scan
         env:
           HEYHACK_API_KEY: ${{ secrets.HEYHACK_API_KEY }}
-          TARGET_URL: http://localhost:3000
-        run: python scripts/heyhack_scan.py
+          APPLICATION_ID: ${{ secrets.APPLICATION_ID }}
+        run: python security/scripts/heyhack_scan.py
+
+      # 🔍 MONITOR
+      - name: Monitor findings (fail fast)
+        env:
+          HEYHACK_API_KEY: ${{ secrets.HEYHACK_API_KEY }}
+          APPLICATION_ID: ${{ secrets.APPLICATION_ID }}
+          CVSS_THRESHOLD: 8
+          CHECK_INTERVAL: 30
+        run: python -u security/scripts/heyhack_monitor.py
