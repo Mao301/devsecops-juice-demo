@@ -6,9 +6,9 @@ on:
 jobs:
 
   # =========================
-  # 1. ATTACH WAF FIRST
+  # SECURITY CONTROLS
   # =========================
-  attach-waf:
+  security-controls:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,17 +30,27 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Apply WAF policy from security repo
+      # 🔐 WAF
+      - name: Apply WAF policy
         env:
           XC_API_TOKEN: ${{ secrets.XC_API_TOKEN }}
         run: python security/scripts/xc_waf.py
 
+      # 🌍 OFAC
+      - name: Apply OFAC policy
+        env:
+          XC_API_TOKEN: ${{ secrets.XC_API_TOKEN }}
+          XC_TENANT: ${{ secrets.XC_TENANT }}
+          XC_NAMESPACE: m-ocampo
+          XC_LB_NAME: demo-multicloud-mao
+        run: python security/scripts/xc_ofac.py
+
 
   # =========================
-  # 2. SECURITY SCAN + MONITOR
+  # SCAN + MONITOR
   # =========================
   security-scan:
-    needs: attach-waf
+    needs: security-controls
     runs-on: ubuntu-latest
 
     steps:
@@ -60,24 +70,20 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install requests python-dotenv
+        run: pip install requests
 
-      # 🚀 Start scan (background)
-      - name: Start Heyhack scan
+      # 🚀 SCAN
+      - name: Run Heyhack scan
         env:
           HEYHACK_API_KEY: ${{ secrets.HEYHACK_API_KEY }}
           APPLICATION_ID: ${{ secrets.APPLICATION_ID }}
-        run: |
-          echo "🚀 Starting Heyhack scan..."
-          python security/scripts/heyhack_scan.py &
+        run: python security/scripts/heyhack_scan.py
 
-      # 🔍 Monitor (foreground - fail fast)
+      # 🔍 MONITOR
       - name: Monitor findings (fail fast)
         env:
           HEYHACK_API_KEY: ${{ secrets.HEYHACK_API_KEY }}
           APPLICATION_ID: ${{ secrets.APPLICATION_ID }}
-          CVSS_THRESHOLD: 11   # puedes bajar a 8 cuando quieras
+          CVSS_THRESHOLD: 11
           CHECK_INTERVAL: 30
-        run: |
-          echo "🔍 Monitoring findings..."
-          python -u security/scripts/heyhack_monitor.py
+        run: python -u security/scripts/heyhack_monitor.py
